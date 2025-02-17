@@ -22,6 +22,7 @@ pipeline {
                 tty: true
             '''
         }
+    }
     stages {
         stage('checkout') {
             steps {
