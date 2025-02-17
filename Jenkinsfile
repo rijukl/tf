@@ -30,7 +30,8 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git "https://github.com/rijukl/tf.git"
+                            git branch: 'main', 
+                                url: 'https://github.com/rijukl/tf.git'
                         }
                     }
                 }
