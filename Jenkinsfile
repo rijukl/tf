@@ -1,4 +1,20 @@
 pipeline {
+    agent {
+        kubernetes {
+        yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+            containers:
+            - name: terraform
+                image: hashicorp/terraform
+                command:
+                - cat
+                tty: true
+            '''
+        }
+    }
+
 
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
@@ -8,7 +24,6 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
 
-    agent any
     stages {
         stage('checkout') {
             steps {
