@@ -1,19 +1,19 @@
 pipeline {
-    agent {
-        kubernetes {
-        yaml '''
-            apiVersion: v1
-            kind: Pod
-            spec:
-            containers:
-            - name: terraform
-                image: hashicorp/terraform
-                command:
-                - cat
-                tty: true
-            '''
-        }
+  agent {
+    kubernetes {
+      yaml '''
+        apiVersion: v1
+        kind: Pod
+        spec:
+          containers:
+          - name: terraform
+            image: hashicorp/terraform
+            command:
+            - cat
+            tty: true
+        '''
     }
+  }
 
 
     parameters {
