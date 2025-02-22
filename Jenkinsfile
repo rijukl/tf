@@ -1,8 +1,5 @@
 pipeline {
-  agent {
-  }
-
-
+  agent any
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
     } 
