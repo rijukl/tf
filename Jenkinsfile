@@ -1,6 +1,5 @@
 pipeline {
-  agent {
-  }
+  agent any
 
 
     parameters {
