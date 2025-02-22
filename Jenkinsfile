@@ -1,46 +1,55 @@
 pipeline {
-  agent any 
-  
+  agent {
+  }
+
+
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
-        choice(name: 'action', choices: ['apply', 'destroy'], description: 'Select the action to perform')
+    } 
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
 
     stages {
-        stage('Checkout') {
+        stage('checkout') {
             steps {
-                withAWS(region: 'us-east-1', credentials: 'awsid') {
-                    git branch: 'main', url: 'https://github.com/rijukl/tf.git'
+                 script{
+                        dir("terraform")
+                        {
+                            git branch: 'main', 
+                                url: 'https://github.com/rijukl/tf.git'
+                        }
+                    }
                 }
             }
-        }
-        stage('Run terraform') {
-            steps {
-                container('terraform') {
-                    sh 'terraform version'
-                }
-            }
-        } 
-        stage('Terraform Init') {
-            steps {
-                container('terraform') {
-                    sh 'terraform init'
-                }
-            }
-        }
+
         stage('Plan') {
             steps {
-                withAWS(region: 'us-east-1', credentials: 'awsid') {
-                    container('terraform') {
-                        sh 'terraform plan -out tfplan'
-                        sh 'terraform show -no-color tfplan > tfplan.txt'
-                    }
-                }    
+                sh 'pwd;cd terraform/ ; terraform init'
+                sh "pwd;cd terraform/ ; terraform plan -out tfplan"
+                sh 'pwd;cd terraform/ ; terraform show -no-color tfplan > tfplan.txt'
             }
         }
+        stage('Approval') {
+           when {
+               not {
+                   equals expected: true, actual: params.autoApprove
+               }
+           }
+
+           steps {
+               script {
+                    def plan = readFile 'terraform/tfplan.txt'
+                    input message: "Do you want to apply the plan?",
+                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+               }
+           }
+       }
+
         stage('Apply / Destroy') {
             steps {
-                withAWS(region: 'us-east-2', credentials: 'awsid') {
+                withAWS(region: 'us-east-1', credentials: 'awsid') {
                     script {
                         container('terraform') {
                             if (params.action == 'apply') {
@@ -62,4 +71,5 @@ pipeline {
             }
         }
     }
-}
+
+  }
