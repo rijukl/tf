@@ -1,9 +1,6 @@
 pipeline {
-  agent any {
-  }
-
-
-
+  agent any 
+  
     parameters {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
         choice(name: 'action', choices: ['apply', 'destroy'], description: 'Select the action to perform')
@@ -43,7 +40,7 @@ pipeline {
         }
         stage('Apply / Destroy') {
             steps {
-                withAWS(region: 'us-east-1', credentials: 'awsid') {
+                withAWS(region: 'us-east-2', credentials: 'awsid') {
                     script {
                         container('terraform') {
                             if (params.action == 'apply') {
